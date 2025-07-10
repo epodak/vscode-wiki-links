@@ -1,0 +1,122 @@
+{
+  "name": "vscode-wiki-links",
+  "displayName": "Wiki Links",
+  "description": "Navigate notes with [[wiki-links]] and auto-completion. Automatically create notes from new inline [[wiki-links]].",
+  "version": "0.0.1",
+  "publisher": "imaikosuke",
+  "repository": {
+    "url": "https://github.com/imaikosuke/vscode-wiki-links.git",
+    "type": "git"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "keywords": [
+    "markdown",
+    "notebook",
+    "notes",
+    "notetaking",
+    "wiki links"
+  ],
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "markdown.markdownItPlugins": true,
+    "languages": [
+      {
+        "id": "markdown-notes",
+        "aliases": [],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "markdown-notes",
+        "scopeName": "text.markdown.notes",
+        "path": "./syntaxes/notes.tmLanguage.json",
+        "injectTo": [
+          "text.html.markdown",
+          "text.html.markdown.jsx"
+        ]
+      }
+    ],
+    "commands": [
+      {
+        "command": "vscodeWikiLinks.newNote",
+        "title": "Wiki Links: New Note"
+      },
+      {
+        "command": "vscodeWikiLinks.newNoteFromSelection",
+        "title": "Wiki Links: New Note From Selection"
+      }
+    ],
+    "configuration": {
+      "title": "Wiki Links Configuration",
+      "properties": {
+        "vscodeWikiLinks.workspaceFilenameConvention": {
+          "type": "string",
+          "enum": [
+            "uniqueFilenames",
+            "relativePaths"
+          ],
+          "default": "uniqueFilenames",
+          "description": "By default, expect 'uniqueFilenames' for every `.md` file in workspace and treat `file.md` as link to file in any subdirectory. If you expect collisions in filenames for notes (eg, `note1/note.md` `note2/note.md`) use 'relativePaths' to render links between files."
+        },
+        "vscodeWikiLinks.createNoteOnGoToDefinitionWhenMissing": {
+          "type": "boolean",
+          "default": true,
+          "description": "By default, when invoking `editor.action.revealDefinition` on `[[note.md]]` if `note.md` does not exist in workspace, create it. NB: Works only when `vscodeWikiLinks.workspaceFilenameConvention` = 'uniqueFilenames'."
+        },
+        "vscodeWikiLinks.newNoteDirectory": {
+          "type": "string",
+          "default": "SAME_AS_ACTIVE_NOTE",
+          "description": "Directory for creating new notes. Defaults to 'SAME_AS_ACTIVE_NOTE'; you can also use 'WORKSPACE_ROOT'; or a 'subdirectory/path' in the Workspace Root."
+        },
+        "vscodeWikiLinks.newNoteTemplate": {
+          "type": "string",
+          "default": "# ${noteName}\n\n",
+          "description": "Template for auto-created note files. Available tokens: ${noteName}, ${timestamp}. Timestamp is inserted in ISO format, i.e. 2020-07-09T05:29:00.541Z."
+        },
+        "vscodeWikiLinks.newNoteFromSelectionReplacementTemplate": {
+          "type": "string",
+          "default": "[[${wikiLink}]]",
+          "description": "After the selection is 'cut' from the active document, replacement text is 'inserted' into its place. Available tokens: ${wikiLink}, ${noteName}. The default insertion is a wiki-link to the new note containing the selected text."
+        },
+        "vscodeWikiLinks.lowercaseNewNoteFilenames": {
+          "type": "boolean",
+          "default": true,
+          "description": "When true, new note file names will be converted to lowercase. Otherwise, the case will be preserved. Eg: my-new-note.md vs. My-New-Note.md"
+        },
+        "vscodeWikiLinks.triggerSuggestOnReplacement": {
+          "type": "boolean",
+          "default": true,
+          "description": "Trigger suggest on both insertion AND replacement of new character inside a wiki-link. Defaults true. Set false to only trigger suggest on insertion."
+        }
+      }
+    }
+  },
+  "activationEvents": [
+    "onLanguage:markdown"
+  ],
+  "main": "./out/extension.js",
+  "scripts": {
+    "compile": "tsc -p ./",
+    "lint": "eslint src --ext .ts",
+    "vpackage": "vsce package",
+    "vpublish": "vsce publish",
+    "gen": "npm run lint && npm run compile && npm run vpackage"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^8.36.0",
+    "@typescript-eslint/parser": "^8.36.0",
+    "@vscode/vsce": "^2.24.0",
+    "eslint": "^8.56.0",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "github-slugger": "^2.0.0"
+  }
+}
