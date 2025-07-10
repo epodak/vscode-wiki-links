@@ -4,6 +4,7 @@
   "description": "Navigate notes with [[wiki-links]] and auto-completion. Automatically create notes from new inline [[wiki-links]].",
   "version": "0.0.1",
   "publisher": "imaikosuke",
+  "icon": "icon.png",
   "repository": {
     "url": "https://github.com/imaikosuke/vscode-wiki-links.git",
     "type": "git"
