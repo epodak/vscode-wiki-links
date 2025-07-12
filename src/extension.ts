@@ -45,18 +45,7 @@ export function activate(context: vscode.ExtensionContext) {
     }
   });
 
-  // Register commands
-  const newNoteDisposable = vscode.commands.registerCommand(
-    'vscodeWikiLinks.newNote',
-    WikiLinksWorkspace.newNote
-  );
-  context.subscriptions.push(newNoteDisposable);
 
-  const newNoteFromSelectionDisposable = vscode.commands.registerCommand(
-    'vscodeWikiLinks.newNoteFromSelection',
-    WikiLinksWorkspace.newNoteFromSelection
-  );
-  context.subscriptions.push(newNoteFromSelectionDisposable);
 
   // Initialize cache
   WikiLinksWorkspace.hydrateCache();

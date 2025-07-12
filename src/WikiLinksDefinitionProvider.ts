@@ -3,6 +3,7 @@ import { WikiLinkRef, getWikiLinkAt } from './WikiLinksRef';
 import { WikiLinksWorkspace } from './WikiLinksWorkspace';
 import { dirname, resolve } from 'path';
 import { existsSync } from 'fs';
+import { TextEncoder } from 'util';
 
 export class WikiLinksDefinitionProvider implements vscode.DefinitionProvider {
   public async provideDefinition(
@@ -90,7 +91,15 @@ export class WikiLinksDefinitionProvider implements vscode.DefinitionProvider {
         return;
       }
       const title = WikiLinksWorkspace.stripExtension(ref.word);
-      const { filepath } = await WikiLinksWorkspace.createNewNoteFile(title);
+      const noteFileName = WikiLinksWorkspace.noteFileNameFromTitle(title);
+      const fromDir = dirname(filename);
+      const filepath = resolve(fromDir, noteFileName);
+      
+      if (!existsSync(filepath)) {
+        const noteContent = `# ${title}\n\n`;
+        await vscode.workspace.fs.writeFile(vscode.Uri.file(filepath), new TextEncoder().encode(noteContent));
+      }
+      
       return filepath;
     }
     return undefined;

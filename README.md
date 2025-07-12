@@ -13,10 +13,7 @@ Navigate notes with `[[wiki-links]]` and auto-completion. Automatically create n
 - **Find All References** (`Shift+F12`) to find all occurrences of a wiki-link
 - **Auto-create notes** when navigating to non-existent wiki-links
 
-### Commands
 
-- **Wiki Links: New Note** - Create a new note with a custom name
-- **Wiki Links: New Note From Selection** - Create a new note from selected text and replace the selection with a wiki-link
 
 ## Usage
 
@@ -29,10 +26,6 @@ Navigate notes with `[[wiki-links]]` and auto-completion. Automatically create n
 
 - `vscodeWikiLinks.workspaceFilenameConvention`: How to handle filenames (`uniqueFilenames` or `relativePaths`)
 - `vscodeWikiLinks.createNoteOnGoToDefinitionWhenMissing`: Auto-create missing notes
-- `vscodeWikiLinks.newNoteDirectory`: Directory for new notes (`SAME_AS_ACTIVE_NOTE`, `WORKSPACE_ROOT`, or custom path)
-- `vscodeWikiLinks.newNoteTemplate`: Template for new notes (supports `${noteName}` and `${timestamp}` tokens)
-- `vscodeWikiLinks.newNoteFromSelectionReplacementTemplate`: Template for replacing selected text (supports `${wikiLink}` and `${noteName}` tokens)
-- `vscodeWikiLinks.lowercaseNewNoteFilenames`: Convert new note filenames to lowercase
 - `vscodeWikiLinks.triggerSuggestOnReplacement`: Trigger suggestions when replacing text in wiki-links
 
 ## Development
