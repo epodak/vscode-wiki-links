@@ -105,7 +105,10 @@ export class WikiLinksWorkspace {
   }
 
   static normalizeNoteNameForFuzzyMatch(noteName: string): string {
-    return noteName.toLowerCase().replace(/[^a-z0-9]/g, '');
+    // Remove file extension first
+    const nameWithoutExt = this.stripExtension(noteName);
+    // Convert to lowercase and remove only spaces and special characters, keep Japanese characters
+    return nameWithoutExt.toLowerCase().replace(/[\s\-_.]+/g, '');
   }
 
   static noteNamesFuzzyMatch(left: string, right: string): boolean {
@@ -123,7 +126,7 @@ export class WikiLinksWorkspace {
   static slugifyClassic(title: string): string {
     return title
       .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/[^\p{L}\p{N}]+/gu, '-')
       .replace(/^-+|-+$/g, '');
   }
 
