@@ -4,3 +4,4 @@ node_modules
 tmp
 .vscode-test/
 *.vsix
+git.md
