@@ -106,7 +106,8 @@
     "lint": "eslint src --ext .ts",
     "vpackage": "vsce package",
     "vpublish": "vsce publish",
-    "gen": "npm run lint && npm run compile && npm run vpackage"
+    "gen": "npm run lint && npm run compile && vsce package",
+    "demo": "npm run lint && npm run compile && vsce package -o vscode-wiki-links-demo.vsix"
   },
   "devDependencies": {
     "@types/node": "^20.11.0",
