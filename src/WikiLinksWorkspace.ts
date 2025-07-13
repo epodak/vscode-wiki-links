@@ -17,7 +17,7 @@ type Config = {
 
 export class WikiLinksWorkspace {
   static _rxWikiLink = '\\[\\[[^\\]]+\\]\\]'; // [[wiki-link]]
-  static _rxMarkdownWordPattern = '([_\\p{L}\\d\\.\\/\\\\]+)';
+  static _rxMarkdownWordPattern = '([_\\p{L}\\d\\.\\/\\\\\\-\\s]+)';
   static _rxFileExtensions = '\\.(md|markdown|mdx|fountain|txt)$';
   static NEW_NOTE_SAME_AS_ACTIVE_NOTE = 'SAME_AS_ACTIVE_NOTE';
   static NEW_NOTE_WORKSPACE_ROOT = 'WORKSPACE_ROOT';

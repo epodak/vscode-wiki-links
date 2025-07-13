@@ -16,25 +16,35 @@ export const NULL_WIKI_LINK_REF: WikiLinkRef = {
 export function getWikiLinkAt(document: vscode.TextDocument, position: vscode.Position): WikiLinkRef | null {
   let ref: string;
   const regex: RegExp = WikiLinksWorkspace.rxWikiLink();
-  const range: vscode.Range | undefined = document.getWordRangeAtPosition(position, regex);
-  if (range) {
-    // Our rxWikiLink contains [[ and ]] chars
-    // but the replacement words do NOT.
-    // So, account for the (exactly) 2 [[  chars at beginning of the match
-    // since our replacement words do not contain [[ chars
-    const s = new vscode.Position(range.start.line, range.start.character + 2);
-    // And, account for the (exactly) 2 ]]  chars at beginning of the match
-    // since our replacement words do not contain ]] chars
-    const e = new vscode.Position(range.end.line, range.end.character - 2);
-    // keep the end
-    const r = new vscode.Range(s, e);
-    ref = document.getText(r);
-    if (ref) {
-      return {
-        type: 'WikiLink',
-        word: ref,
-        range: r,
-      };
+  
+  // Get the line text and find all wiki-link matches
+  const line = document.lineAt(position.line).text;
+  let match;
+  
+  while ((match = regex.exec(line)) !== null) {
+    const matchStart = match.index;
+    const matchEnd = match.index + match[0].length;
+    
+    // Check if the cursor position is within this match
+    if (position.character >= matchStart && position.character <= matchEnd) {
+      // Our rxWikiLink contains [[ and ]] chars
+      // but the replacement words do NOT.
+      // So, account for the (exactly) 2 [[  chars at beginning of the match
+      // since our replacement words do not contain [[ chars
+      const s = new vscode.Position(position.line, matchStart + 2);
+      // And, account for the (exactly) 2 ]]  chars at beginning of the match
+      // since our replacement words do not contain ]] chars
+      const e = new vscode.Position(position.line, matchEnd - 2);
+      // keep the end
+      const r = new vscode.Range(s, e);
+      ref = document.getText(r);
+      if (ref) {
+        return {
+          type: 'WikiLink',
+          word: ref,
+          range: r,
+        };
+      }
     }
   }
 
