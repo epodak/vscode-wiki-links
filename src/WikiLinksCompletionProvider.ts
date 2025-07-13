@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { getWikiLinkOrEmptyAt } from './WikiLinksRef';
 import { WikiLinksWorkspace } from './WikiLinksWorkspace';
+import { basename } from 'path';
 
 class WikiLinksCompletionItem extends vscode.CompletionItem {
   fsPath?: string | undefined;
@@ -23,15 +24,42 @@ export class WikiLinksCompletionProvider implements vscode.CompletionItemProvide
       return [];
     }
 
-    // デバッグ用のログを追加
-    console.log('WikiLinksCompletionProvider: provideCompletionItems called');
-    console.log('Context trigger character:', _context.triggerCharacter);
-    console.log('Position:', position.line, position.character);
-
     return (await WikiLinksWorkspace.noteFiles()).map((f) => {
       const kind = vscode.CompletionItemKind.File;
-      const label = basename(f.fsPath, '.md');
+      let label = WikiLinksWorkspace.getDisplayName(f.fsPath, document);
+
+      // relativePathsモードで階層の違いを表示
+      if (WikiLinksWorkspace.useRelativePaths()) {
+        const workspaceRoot = vscode.workspace.getWorkspaceFolder(document.uri);
+        if (workspaceRoot) {
+          const relativePath = vscode.workspace.asRelativePath(f.fsPath);
+          const dirPath = relativePath.split('/').slice(0, -1).join('/');
+          if (dirPath) {
+            // ラベルに階層情報を含める
+            label = `${label} (${dirPath})`;
+          }
+        }
+      }
+      
       const item = new WikiLinksCompletionItem(label, kind, f.fsPath);
+      
+      // relativePathsモードで詳細情報を追加
+      if (WikiLinksWorkspace.useRelativePaths()) {
+        const workspaceRoot = vscode.workspace.getWorkspaceFolder(document.uri);
+        if (workspaceRoot) {
+          const relativePath = vscode.workspace.asRelativePath(f.fsPath);
+          const dirPath = relativePath.split('/').slice(0, -1).join('/');
+          if (dirPath) {
+            item.detail = `📁 ${dirPath}`;
+            // 挿入テキストを階層情報を含む相対パスに設定
+            item.insertText = WikiLinksWorkspace.stripExtension(relativePath);
+          } else {
+            // ルートレベルのファイルの場合
+            item.insertText = WikiLinksWorkspace.stripExtension(basename(f.fsPath));
+          }
+        }
+      }
+      
       if (ref && ref.range) {
         item.range = ref.range;
       }
@@ -59,12 +87,4 @@ export class WikiLinksCompletionProvider implements vscode.CompletionItemProvide
     }
     return item;
   }
-}
-
-function basename(path: string, ext?: string): string {
-  const name = path.split('/').pop() || path.split('\\').pop() || path;
-  if (ext && name.endsWith(ext)) {
-    return name.slice(0, -ext.length);
-  }
-  return name;
 } 

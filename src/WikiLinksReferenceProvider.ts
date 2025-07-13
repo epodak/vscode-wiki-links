@@ -32,7 +32,18 @@ export class WikiLinksReferenceProvider implements vscode.ReferenceProvider {
 
           while ((match = wikiLinkRegex.exec(line)) !== null) {
             const wikiLinkText = match[0].slice(2, -2); // Remove [[ and ]]
-            if (WikiLinksWorkspace.noteNamesFuzzyMatchText(wikiLinkText, ref.word)) {
+            let isMatch = false;
+            
+            if (WikiLinksWorkspace.useUniqueFilenames()) {
+              isMatch = WikiLinksWorkspace.noteNamesFuzzyMatchText(wikiLinkText, ref.word);
+            } else if (WikiLinksWorkspace.useRelativePaths()) {
+              // For relativePaths mode, check if the wiki link matches the relative path
+              const relativePath = WikiLinksWorkspace.getRelativePath(file.fsPath, document);
+              isMatch = WikiLinksWorkspace.noteNamesFuzzyMatchText(wikiLinkText, ref.word) ||
+                       WikiLinksWorkspace.noteNamesFuzzyMatchText(wikiLinkText, relativePath);
+            }
+            
+            if (isMatch) {
               const startPos = new vscode.Position(lineNum, match.index);
               const endPos = new vscode.Position(lineNum, match.index + match[0].length);
               const range = new vscode.Range(startPos, endPos);

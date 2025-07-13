@@ -39,11 +39,12 @@ export class WikiLinksWorkspace {
 
   static cfg(): Config {
     const c = vscode.workspace.getConfiguration('vscodeWikiLinks');
-    return {
+    const config = {
       createNoteOnGoToDefinitionWhenMissing: c.get('createNoteOnGoToDefinitionWhenMissing') as boolean,
       workspaceFilenameConvention: c.get('workspaceFilenameConvention') as WorkspaceFilenameConvention,
       triggerSuggestOnReplacement: c.get('triggerSuggestOnReplacement') as boolean,
     };
+    return config;
   }
 
   static rxWikiLink(): RegExp {
@@ -60,6 +61,43 @@ export class WikiLinksWorkspace {
 
   static useUniqueFilenames(): boolean {
     return this.cfg().workspaceFilenameConvention === WorkspaceFilenameConvention.uniqueFilenames;
+  }
+
+  static useRelativePaths(): boolean {
+    return this.cfg().workspaceFilenameConvention === WorkspaceFilenameConvention.relativePaths;
+  }
+
+  static getDisplayName(filePath: string, relativeToDocument?: vscode.TextDocument): string {
+    if (this.useRelativePaths() && relativeToDocument) {
+      const workspaceRoot = vscode.workspace.getWorkspaceFolder(relativeToDocument.uri);
+      if (workspaceRoot) {
+        const relativePath = vscode.workspace.asRelativePath(filePath);
+        const displayName = this.stripExtension(relativePath);
+        return displayName;
+      }
+    }
+    const basenameOnly = this.stripExtension(basename(filePath));
+    return basenameOnly;
+  }
+
+  static getRelativePath(filePath: string, relativeToDocument?: vscode.TextDocument): string {
+    if (relativeToDocument) {
+      const workspaceRoot = vscode.workspace.getWorkspaceFolder(relativeToDocument.uri);
+      if (workspaceRoot) {
+        const relativePath = vscode.workspace.asRelativePath(filePath);
+        return this.stripExtension(relativePath);
+      }
+    }
+    return this.stripExtension(basename(filePath));
+  }
+
+  static getRelativePathFromDocument(filePath: string, relativeToDocument: vscode.TextDocument): string {
+    const workspaceRoot = vscode.workspace.getWorkspaceFolder(relativeToDocument.uri);
+    if (workspaceRoot) {
+      const relativePath = vscode.workspace.asRelativePath(filePath);
+      return this.stripExtension(relativePath);
+    }
+    return this.stripExtension(basename(filePath));
   }
 
   static createNoteOnGoToDefinitionWhenMissing(): boolean {

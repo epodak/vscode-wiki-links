@@ -59,8 +59,39 @@ export class WikiLinksDefinitionProvider implements vscode.DefinitionProvider {
       files = noteFiles.filter((f) => {
         return WikiLinksWorkspace.noteNamesFuzzyMatch(f.fsPath, ref.word);
       });
+    } else if (WikiLinksWorkspace.useRelativePaths()) {
+      // For relativePaths mode, try to match by relative path
+      files = noteFiles.filter((f) => {
+        const relativePath = WikiLinksWorkspace.getRelativePath(f.fsPath, relativeToDocument || undefined);
+        // 複数のマッチング方法を試す
+        let isMatch = WikiLinksWorkspace.noteNamesFuzzyMatchText(relativePath, ref.word);
+        
+        // 相対パス全体でのマッチングも試す
+        if (!isMatch && relativeToDocument) {
+          const workspaceRoot = vscode.workspace.getWorkspaceFolder(relativeToDocument.uri);
+          if (workspaceRoot) {
+            const fullRelativePath = vscode.workspace.asRelativePath(f.fsPath);
+            const normalizedPath = WikiLinksWorkspace.stripExtension(fullRelativePath);
+            isMatch = WikiLinksWorkspace.noteNamesFuzzyMatchText(normalizedPath, ref.word);
+          }
+        }
+        
+        // 階層情報を含むwikiリンクの処理
+        if (!isMatch && ref.word.includes('(')) {
+          const match = ref.word.match(/^(.+?)\s*\((.+?)\)$/);
+          if (match && match[1] && match[2]) {
+            const fileName = match[1].trim();
+            const dirPath = match[2].trim();
+            const expectedRelativePath = `${dirPath}/${fileName}`;
+            const actualRelativePath = WikiLinksWorkspace.stripExtension(vscode.workspace.asRelativePath(f.fsPath));
+            isMatch = WikiLinksWorkspace.noteNamesFuzzyMatchText(actualRelativePath, expectedRelativePath);
+          }
+        }
+
+        return isMatch;
+      });
     }
-    
+
     // If we did not find any files in the workspace,
     // see if a file exists at the relative path:
     if (files.length === 0 && relativeToDocument && relativeToDocument.uri) {
