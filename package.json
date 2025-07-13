@@ -2,7 +2,7 @@
   "name": "vscode-wiki-links",
   "displayName": "Wiki Links",
   "description": "Navigate notes with [[wiki-links]] and auto-completion. Automatically create notes from new inline [[wiki-links]].",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "publisher": "imaikosuke",
   "icon": "icon.png",
   "repository": {
@@ -42,7 +42,6 @@
         ]
       }
     ],
-
     "configuration": {
       "title": "Wiki Links Configuration",
       "properties": {
@@ -60,7 +59,6 @@
           "default": true,
           "description": "By default, when invoking `editor.action.revealDefinition` on `[[note.md]]` if `note.md` does not exist in workspace, create it. NB: Works only when `vscodeWikiLinks.workspaceFilenameConvention` = 'uniqueFilenames'."
         },
-
         "vscodeWikiLinks.triggerSuggestOnReplacement": {
           "type": "boolean",
           "default": true,
