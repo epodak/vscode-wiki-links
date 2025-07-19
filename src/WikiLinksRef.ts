@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import { WikiLinksWorkspace } from './WikiLinksWorkspace';
 
 export interface WikiLinkRef {
   type: 'WikiLink' | 'Null';
@@ -13,67 +12,36 @@ export const NULL_WIKI_LINK_REF: WikiLinkRef = {
   range: undefined,
 };
 
-export function getWikiLinkAt(document: vscode.TextDocument, position: vscode.Position): WikiLinkRef | null {
-  let ref: string;
-  const regex: RegExp = WikiLinksWorkspace.rxWikiLink();
-  
-  // Get the line text and find all wiki-link matches
-  const line = document.lineAt(position.line).text;
-  let match;
-  
-  while ((match = regex.exec(line)) !== null) {
-    const matchStart = match.index;
-    const matchEnd = match.index + match[0].length;
-    
-    // Check if the cursor position is within this match
-    if (position.character >= matchStart && position.character <= matchEnd) {
-      // Our rxWikiLink contains [[ and ]] chars
-      // but the replacement words do NOT.
-      // So, account for the (exactly) 2 [[  chars at beginning of the match
-      // since our replacement words do not contain [[ chars
-      const s = new vscode.Position(position.line, matchStart + 2);
-      // And, account for the (exactly) 2 ]]  chars at beginning of the match
-      // since our replacement words do not contain ]] chars
-      const e = new vscode.Position(position.line, matchEnd - 2);
-      // keep the end
-      const r = new vscode.Range(s, e);
-      ref = document.getText(r);
-      if (ref) {
-        return {
-          type: 'WikiLink',
-          word: ref,
-          range: r,
-        };
-      }
-    }
-  }
-
-  return null;
-}
-
-export function getEmptyWikiLinkAt(document: vscode.TextDocument, position: vscode.Position): WikiLinkRef {
-  // Handle the case where we have the cursor directly after [[ chars with NO letters after the [[
-  const c = Math.max(0, position.character - 2); // 2 chars left, unless we are at the 0 or 1 char
-  const s = new vscode.Position(position.line, c);
-  const searchRange = new vscode.Range(s, position);
-  const precedingChars = document.getText(searchRange);
-
-  if (precedingChars === '[[') {
-    return {
-      type: 'WikiLink',
-      word: '', // just use empty string
-      // we DO NOT want the replacement position to include the brackets:
-      range: new vscode.Range(position, position),
-    };
-  }
-
-  return NULL_WIKI_LINK_REF;
-}
-
 export function getWikiLinkOrEmptyAt(document: vscode.TextDocument, position: vscode.Position): WikiLinkRef {
-  let ref = getWikiLinkAt(document, position);
-  if (!ref) {
-    ref = getEmptyWikiLinkAt(document, position);
+  const lineText = document.lineAt(position.line).text;
+  const textBeforeCursor = lineText.substring(0, position.character);
+
+  const linkStartPos = textBeforeCursor.lastIndexOf('[[');
+  
+  // No opening brackets before cursor, not a link
+  if (linkStartPos === -1) {
+    return NULL_WIKI_LINK_REF;
   }
-  return ref;
+
+  const textAfterLinkStart = textBeforeCursor.substring(linkStartPos);
+  
+  // Check if there's a complete wiki link (with ]] ) before the cursor
+  // If so, we are NOT inside an active wiki link
+  if (textAfterLinkStart.includes(']]')) {
+    return NULL_WIKI_LINK_REF;
+  }
+
+  const word = textAfterLinkStart.substring(2); // Get the text between "[[" and cursor
+
+  // Define the range of the text to be replaced on completion.
+  // It starts right after the "[[" and ends at the cursor.
+  const start = new vscode.Position(position.line, linkStartPos + 2);
+  const end = position;
+  const range = new vscode.Range(start, end);
+
+  return {
+    type: 'WikiLink',
+    word: word,
+    range: range,
+  };
 } 

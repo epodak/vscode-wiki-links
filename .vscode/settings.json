@@ -1,0 +1,21 @@
+{
+  "typescript.preferences.quoteStyle": "single",
+  "editor.insertSpaces": true,
+  "editor.tabSize": 2,
+  "files.exclude": {
+    "out": false,
+    "node_modules": true,
+    "*.vsix": true
+  },
+  "search.exclude": {
+    "out": true,
+    "node_modules": true,
+    "*.vsix": true
+  },
+  "typescript.tsc.autoDetect": "on",
+  "npm.enableScriptExplorer": true,
+  "extensions.ignoreRecommendations": false,
+  "files.associations": {
+    "*.json": "jsonc"
+  }
+} 

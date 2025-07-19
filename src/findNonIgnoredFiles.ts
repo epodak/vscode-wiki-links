@@ -1,10 +1,5 @@
-// "Here's an updated snippet which will return URIs of workspace files except
-// for those ignored either by search.exclude or files.exclude or .gitignore."
-// via:
-// https://github.com/microsoft/vscode/issues/48674
 import { workspace, Uri } from 'vscode';
-import { exec, ExecException } from 'child_process';
-// import applicationInsights from './telemetry';
+import { spawn } from 'child_process';
 import { join } from 'path';
 
 export default async function findNonIgnoredFiles(
@@ -17,53 +12,84 @@ export default async function findNonIgnoredFiles(
   ].join(',');
 
   const uris = await workspace.findFiles(pattern, `{${exclude}}`);
-  if (!checkGitIgnore) {
+  if (!checkGitIgnore || uris.length === 0) {
+    // --- DIAGNOSTIC LOG ---
+    try {
+      const fs = require('fs');
+      fs.writeFileSync('d:/findNonIgnoredFiles_log_no_git.txt', uris.map(u => u.fsPath).join('\n'));
+    } catch(e) { console.error("DIAGNOSTIC LOG FAILED", e); }
+    // --- END DIAGNOSTIC LOG ---
     return uris;
   }
-  return filterGitIgnored(uris);
+  const filteredUris = await filterGitIgnored(uris);
+  // --- DIAGNOSTIC LOG ---
+  try {
+    const fs = require('fs');
+    fs.writeFileSync('d:/findNonIgnoredFiles_log_git.txt', filteredUris.map(u => u.fsPath).join('\n'));
+  } catch(e) { console.error("DIAGNOSTIC LOG FAILED", e); }
+  // --- END DIAGNOSTIC LOG ---
+  return filteredUris;
 }
 
-// TODO: https://github.com/Microsoft/vscode/blob/release/1.27/extensions/git/src/api/git.d.ts instead of git shell if possible
 async function filterGitIgnored(uris: Uri[]): Promise<Uri[]> {
-  const workspaceRelativePaths = uris.map((uri) => workspace.asRelativePath(uri, false));
-  for (const workspaceDirectory of workspace.workspaceFolders!) {
+  const workspaceFolders = workspace.workspaceFolders;
+  if (!workspaceFolders) {
+    return uris;
+  }
+
+  const CHUNK_SIZE = 200; // Process 200 files at a time to be safe
+  const ignoredPaths = new Set<string>();
+
+  for (const workspaceDirectory of workspaceFolders) {
     const workspaceDirectoryPath = workspaceDirectory.uri.fsPath;
-    try {
-      const { stdout, stderr } = await new Promise<{ stdout: string; stderr: string }>(
-        (resolve, reject) => {
-          exec(
-            `git check-ignore ${workspaceRelativePaths.join(' ')}`,
-            { cwd: workspaceDirectoryPath },
-            // https://git-scm.com/docs/git-check-ignore#_exit_status
-            (error: ExecException | null, stdout, stderr) => {
-              if (error && error.code !== 0 && error.code !== 1) {
-                reject(error);
-                return;
-              }
+    
+    const urisInWorkspace = uris.filter(uri => uri.fsPath.startsWith(workspaceDirectoryPath));
+    if (urisInWorkspace.length === 0) {
+      continue;
+    }
 
-              resolve({ stdout, stderr });
+    const relativePaths = urisInWorkspace.map(uri => workspace.asRelativePath(uri, false));
+
+    for (let i = 0; i < relativePaths.length; i += CHUNK_SIZE) {
+      const chunk = relativePaths.slice(i, i + CHUNK_SIZE);
+      
+      try {
+        const stdout = await new Promise<string>((resolve, reject) => {
+          const git = spawn('git', ['check-ignore', '--stdin', '-z'], { cwd: workspaceDirectoryPath });
+          
+          let output = '';
+          git.stdout.on('data', (data) => (output += data.toString()));
+          git.stderr.on('data', (data) => console.warn(`git stderr: ${data.toString()}`));
+          
+          git.on('error', reject);
+          git.on('close', (code) => {
+            // git check-ignore exits with 1 if some files are ignored, 0 if none are, 128 on error.
+            if (code === 0 || code === 1) {
+              resolve(output);
+            } else {
+              reject(new Error(`git process exited with code ${code}`));
             }
-          );
-        }
-      );
+          });
 
-      if (stderr) {
-        throw new Error(stderr);
-      }
+          // Write paths to stdin, separated by null characters
+          git.stdin.write(chunk.join('\0'));
+          git.stdin.end();
+        });
 
-      for (const relativePath of stdout.split('\n')) {
-        const uri = Uri.file(
-          join(workspaceDirectoryPath, relativePath.slice(1, -1) /* Remove quotes */)
-        );
-        const index = uris.findIndex((u) => u.fsPath === uri.fsPath);
-        if (index > -1) {
-          uris.splice(index, 1);
+        if (stdout) {
+          const ignored = stdout.split('\0').filter(p => p.length > 0);
+          ignored.forEach(p => ignoredPaths.add(join(workspaceDirectoryPath, p)));
         }
+      } catch (error) {
+        console.error('findNonIgnoredFiles-git-exec-error', error);
+        // Continue even if git fails for a chunk
       }
-    } catch (error) {
-      console.error('findNonIgnoredFiles-git-exec-error', error);
-      //   applicationInsights.sendTelemetryEvent('findNonIgnoredFiles-git-exec-error');
     }
   }
-  return uris;
+
+  if (ignoredPaths.size === 0) {
+    return uris;
+  }
+
+  return uris.filter(uri => !ignoredPaths.has(uri.fsPath));
 }

@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(npm run compile:*)",
+      "Bash(npx tsc:*)",
+      "Bash(node:*)",
+      "Bash(npm install)",
+      "Bash(/home/dev/.nvm/versions/node/v20.18.3/bin/npm run compile)",
+      "Bash(/home/dev/.nvm/versions/node/v20.18.3/bin/npm install)",
+      "Bash(/home/dev/.nvm/versions/node/v20.18.3/bin/npm run lint)",
+      "Bash(/home/dev/.nvm/versions/node/v20.18.3/bin/node /mnt/d/80_WORKSPC/PRJ/Activ/vscode-wiki-links/test_matching.js)",
+      "Bash(/home/dev/.nvm/versions/node/v20.18.3/bin/node /mnt/d/80_WORKSPC/PRJ/Activ/vscode-wiki-links/test_displayname.js)",
+      "Bash(/home/dev/.nvm/versions/node/v20.18.3/bin/node /mnt/d/80_WORKSPC/PRJ/Activ/vscode-wiki-links/test_fuzzy.js)",
+      "Bash(/home/dev/.nvm/versions/node/v20.18.3/bin/node /mnt/d/80_WORKSPC/PRJ/Activ/vscode-wiki-links/debug_test.js)",
+      "Bash(rm:*)",
+      "Bash(/home/dev/.nvm/versions/node/v20.18.3/bin/node /mnt/d/80_WORKSPC/PRJ/Activ/vscode-wiki-links/test_extract.js)",
+      "Bash(/home/dev/.nvm/versions/node/v20.18.3/bin/node /mnt/d/80_WORKSPC/PRJ/Activ/vscode-wiki-links/test_normalize.js)",
+      "Bash(fd:*)",
+      "Bash(find:*)",
+      "Bash(npm search \"fuzzy search\")",
+      "Bash(npm install:*)",
+      "Bash(/usr/bin/npm install)",
+      "Bash(ls:*)",
+      "Bash(tsc:*)"
+    ],
+    "deny": []
+  }
+}

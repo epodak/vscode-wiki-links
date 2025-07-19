@@ -28,14 +28,8 @@ export class WikiLinksWorkspace {
     triggerSuggestOnReplacement: true,
   };
 
-  static DOCUMENT_SELECTOR = [
-    { scheme: 'file', language: 'markdown' },
-    { scheme: 'file', language: 'mdx' },
-    { scheme: 'file', language: 'markdown-notes' },
-  ];
-
-  // Cache object to store results from noteFiles() in order to provide a synchronous method to the preview renderer.
-  static noteFileCache: vscode.Uri[] = [];
+  // Cache is disabled for now to ensure correctness.
+  // static noteFileCache: vscode.Uri[] = [];
 
   static cfg(): Config {
     const c = vscode.workspace.getConfiguration('vscodeWikiLinks');
@@ -162,25 +156,8 @@ export class WikiLinksWorkspace {
   }
 
   static async noteFiles(): Promise<Array<vscode.Uri>> {
-    if (this.noteFileCache.length > 0) {
-      return this.noteFileCache;
-    }
-
     const files = await findNonIgnoredFiles('**/*');
-    this.noteFileCache = files.filter((f) => this.rxFileExtensions().test(f.fsPath));
-    return this.noteFileCache;
-  }
-
-  static noteFilesFromCache(): Array<vscode.Uri> {
-    return this.noteFileCache;
-  }
-
-  static updateCacheFor(_fsPath: string) {
-    // Clear cache when files change
-    this.noteFileCache = [];
-  }
-
-  static async hydrateCache(): Promise<Array<vscode.Uri>> {
-    return this.noteFiles();
+    const noteFiles = files.filter((f) => this.rxFileExtensions().test(f.fsPath));
+    return noteFiles;
   }
 } 

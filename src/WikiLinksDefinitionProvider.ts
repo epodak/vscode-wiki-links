@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { WikiLinkRef, getWikiLinkAt } from './WikiLinksRef';
+import { WikiLinkRef, getWikiLinkOrEmptyAt } from './WikiLinksRef';
 import { WikiLinksWorkspace } from './WikiLinksWorkspace';
 import { dirname, resolve } from 'path';
 import { existsSync } from 'fs';
@@ -11,7 +11,7 @@ export class WikiLinksDefinitionProvider implements vscode.DefinitionProvider {
     position: vscode.Position,
     _token: vscode.CancellationToken
   ) {
-    const ref = getWikiLinkAt(document, position);
+    const ref = getWikiLinkOrEmptyAt(document, position);
     if (!ref || ref.type !== 'WikiLink') {
       return [];
     }
@@ -36,14 +36,6 @@ export class WikiLinksDefinitionProvider implements vscode.DefinitionProvider {
     relativeToDocument: vscode.TextDocument | undefined | null
   ): Promise<Array<vscode.Uri>> {
     const files: Array<vscode.Uri> = await WikiLinksWorkspace.noteFiles();
-    return this._filesForWikiLinkRefAndNoteFiles(ref, relativeToDocument, files);
-  }
-
-  static filesForWikiLinkRefFromCache(
-    ref: WikiLinkRef,
-    relativeToDocument: vscode.TextDocument | undefined | null
-  ) {
-    const files = WikiLinksWorkspace.noteFilesFromCache();
     return this._filesForWikiLinkRefAndNoteFiles(ref, relativeToDocument, files);
   }
 

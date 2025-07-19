@@ -42,30 +42,30 @@
         ]
       }
     ],
-    "configuration": {
-      "title": "Wiki Links Configuration",
-      "properties": {
-        "vscodeWikiLinks.workspaceFilenameConvention": {
-          "type": "string",
-          "enum": [
-            "uniqueFilenames",
-            "relativePaths"
-          ],
-          "default": "uniqueFilenames",
-          "description": "By default, expect 'uniqueFilenames' for every `.md` file in workspace and treat `file.md` as link to file in any subdirectory. If you expect collisions in filenames for notes (eg, `note1/note.md` `note2/note.md`) use 'relativePaths' to render links between files."
-        },
-        "vscodeWikiLinks.createNoteOnGoToDefinitionWhenMissing": {
-          "type": "boolean",
-          "default": true,
-          "description": "By default, when invoking `editor.action.revealDefinition` on `[[note.md]]` if `note.md` does not exist in workspace, create it. NB: Works only when `vscodeWikiLinks.workspaceFilenameConvention` = 'uniqueFilenames'."
-        },
-        "vscodeWikiLinks.triggerSuggestOnReplacement": {
-          "type": "boolean",
-          "default": true,
-          "description": "Trigger suggest on both insertion AND replacement of new character inside a wiki-link. Defaults true. Set false to only trigger suggest on insertion."
+          "configuration": {
+        "title": "Wiki Links Configuration",
+        "properties": {
+          "vscodeWikiLinks.workspaceFilenameConvention": {
+            "type": "string",
+            "enum": [
+              "uniqueFilenames",
+              "relativePaths"
+            ],
+            "default": "uniqueFilenames",
+            "description": "By default, expect 'uniqueFilenames' for every `.md` file in workspace and treat `file.md` as link to file in any subdirectory. If you expect collisions in filenames for notes (eg, `note1/note.md` `note2/note.md`) use 'relativePaths' to render links between files."
+          },
+          "vscodeWikiLinks.createNoteOnGoToDefinitionWhenMissing": {
+            "type": "boolean",
+            "default": true,
+            "description": "By default, when invoking `editor.action.revealDefinition` on `[[note.md]]` if `note.md` does not exist in workspace, create it. NB: Works only when `vscodeWikiLinks.workspaceFilenameConvention` = 'uniqueFilenames'."
+          },
+          "vscodeWikiLinks.triggerSuggestOnReplacement": {
+            "type": "boolean",
+            "default": true,
+            "description": "Trigger suggest on both insertion AND replacement of new character inside a wiki-link. Defaults true. Set false to only trigger suggest on insertion."
+          }
         }
       }
-    }
   },
   "activationEvents": [
     "onLanguage:markdown"
@@ -89,6 +89,7 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
+    "fuse.js": "7.1.0",
     "github-slugger": "^2.0.0"
   }
 }

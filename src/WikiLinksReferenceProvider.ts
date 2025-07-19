@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { getWikiLinkAt } from './WikiLinksRef';
+import { getWikiLinkOrEmptyAt } from './WikiLinksRef';
 import { WikiLinksWorkspace } from './WikiLinksWorkspace';
 
 export class WikiLinksReferenceProvider implements vscode.ReferenceProvider {
@@ -9,7 +9,7 @@ export class WikiLinksReferenceProvider implements vscode.ReferenceProvider {
     _context: vscode.ReferenceContext,
     _token: vscode.CancellationToken
   ): Promise<vscode.Location[]> {
-    const ref = getWikiLinkAt(document, position);
+    const ref = getWikiLinkOrEmptyAt(document, position);
     if (!ref || ref.type !== 'WikiLink') {
       return [];
     }
