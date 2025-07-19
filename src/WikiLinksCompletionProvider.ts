@@ -4,6 +4,13 @@ import { getWikiLinkOrEmptyAt } from './WikiLinksRef';
 import { WikiLinksWorkspace } from './WikiLinksWorkspace';
 import { basename } from 'path';
 
+interface SearchDataItem {
+  file: vscode.Uri;
+  displayName: string;
+  fileNameWithoutExt: string;
+  relativePath: string;
+}
+
 class WikiLinksCompletionItem extends vscode.CompletionItem {
   fsPath?: string | undefined;
 
@@ -18,7 +25,7 @@ export class WikiLinksCompletionProvider implements vscode.CompletionItemProvide
     document: vscode.TextDocument,
     position: vscode.Position,
     _token: vscode.CancellationToken,
-    context: vscode.CompletionContext
+    _context: vscode.CompletionContext
   ) {
     const ref = getWikiLinkOrEmptyAt(document, position);
     if (!ref || ref.type !== 'WikiLink') {
@@ -45,7 +52,7 @@ export class WikiLinksCompletionProvider implements vscode.CompletionItemProvide
         .map((item, index) => ({ item, score: 0, refIndex: index }));
     } else {
       // Configure Fuse.js with permissive settings for better matching
-      const fuseOptions: IFuseOptions<any> = {
+      const fuseOptions: IFuseOptions<SearchDataItem> = {
         includeScore: true,
         threshold: 0.8, // 更宽松的阈值，支持模糊匹配
         ignoreLocation: true,

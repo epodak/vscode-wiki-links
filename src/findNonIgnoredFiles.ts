@@ -1,6 +1,7 @@
 import { workspace, Uri } from 'vscode';
 import { spawn } from 'child_process';
 import { join } from 'path';
+import * as fs from 'fs';
 
 export default async function findNonIgnoredFiles(
   pattern: string,
@@ -15,7 +16,6 @@ export default async function findNonIgnoredFiles(
   if (!checkGitIgnore || uris.length === 0) {
     // --- DIAGNOSTIC LOG ---
     try {
-      const fs = require('fs');
       fs.writeFileSync('d:/findNonIgnoredFiles_log_no_git.txt', uris.map(u => u.fsPath).join('\n'));
     } catch(e) { console.error("DIAGNOSTIC LOG FAILED", e); }
     // --- END DIAGNOSTIC LOG ---
@@ -24,7 +24,6 @@ export default async function findNonIgnoredFiles(
   const filteredUris = await filterGitIgnored(uris);
   // --- DIAGNOSTIC LOG ---
   try {
-    const fs = require('fs');
     fs.writeFileSync('d:/findNonIgnoredFiles_log_git.txt', filteredUris.map(u => u.fsPath).join('\n'));
   } catch(e) { console.error("DIAGNOSTIC LOG FAILED", e); }
   // --- END DIAGNOSTIC LOG ---
